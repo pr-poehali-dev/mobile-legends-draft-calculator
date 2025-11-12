@@ -3,38 +3,9 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
-
-interface Hero {
-  id: string;
-  name: string;
-  role: string;
-  tier: 'S' | 'A' | 'B' | 'C';
-  counters: string[];
-  counteredBy: string[];
-  icon: string;
-}
-
-const heroesData: Hero[] = [
-  { id: '1', name: 'Lancelot', role: 'Assassin', tier: 'S', counters: ['miya', 'layla'], counteredBy: ['saber', 'natalia'], icon: '⚔️' },
-  { id: '2', name: 'Fanny', role: 'Assassin', tier: 'S', counters: ['marksman'], counteredBy: ['tigreal', 'khufra'], icon: '🗡️' },
-  { id: '3', name: 'Ling', role: 'Assassin', tier: 'S', counters: ['mages'], counteredBy: ['cyclops'], icon: '🥷' },
-  { id: '4', name: 'Gusion', role: 'Assassin', tier: 'A', counters: ['mm'], counteredBy: ['gatotkaca'], icon: '🔪' },
-  { id: '5', name: 'Tigreal', role: 'Tank', tier: 'A', counters: ['fanny', 'assassins'], counteredBy: ['khufra'], icon: '🛡️' },
-  { id: '6', name: 'Khufra', role: 'Tank', tier: 'S', counters: ['fanny', 'mobility'], counteredBy: ['karrie'], icon: '⚡' },
-  { id: '7', name: 'Gatotkaca', role: 'Tank', tier: 'A', counters: ['physical'], counteredBy: ['karrie'], icon: '💪' },
-  { id: '8', name: 'Yve', role: 'Mage', tier: 'S', counters: ['melee'], counteredBy: ['assassins'], icon: '🌟' },
-  { id: '9', name: 'Valentina', role: 'Mage', tier: 'S', counters: ['ultimate'], counteredBy: ['early'], icon: '👑' },
-  { id: '10', name: 'Pharsa', role: 'Mage', tier: 'A', counters: ['low-mobility'], counteredBy: ['assassins'], icon: '🦅' },
-  { id: '11', name: 'Beatrix', role: 'Marksman', tier: 'S', counters: ['tanks'], counteredBy: ['assassins'], icon: '🎯' },
-  { id: '12', name: 'Wanwan', role: 'Marksman', tier: 'S', counters: ['tanks'], counteredBy: ['cc'], icon: '🏹' },
-  { id: '13', name: 'Moskov', role: 'Marksman', tier: 'A', counters: ['tanks'], counteredBy: ['burst'], icon: '🔫' },
-  { id: '14', name: 'Estes', role: 'Support', tier: 'S', counters: ['poke'], counteredBy: ['anti-heal'], icon: '💚' },
-  { id: '15', name: 'Mathilda', role: 'Support', tier: 'A', counters: ['melee'], counteredBy: ['cc'], icon: '✨' },
-  { id: '16', name: 'Chou', role: 'Fighter', tier: 'S', counters: ['mages'], counteredBy: ['cc'], icon: '🥋' },
-  { id: '17', name: 'Paquito', role: 'Fighter', tier: 'A', counters: ['squishy'], counteredBy: ['kite'], icon: '🥊' },
-  { id: '18', name: 'Fredrinn', role: 'Fighter', tier: 'S', counters: ['physical'], counteredBy: ['true-damage'], icon: '🔨' },
-];
+import { heroesData, type Hero } from '@/data/heroes';
 
 export default function DraftCalculator() {
   const [blueBans, setBlueBans] = useState<string[]>([]);
@@ -43,12 +14,15 @@ export default function DraftCalculator() {
   const [redPicks, setRedPicks] = useState<string[]>([]);
   const [selectedRole, setSelectedRole] = useState<string>('All');
   const [phase, setPhase] = useState<'ban' | 'pick'>('ban');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const roles = ['All', 'Tank', 'Fighter', 'Assassin', 'Mage', 'Marksman', 'Support'];
 
-  const filteredHeroes = heroesData.filter(hero => 
-    selectedRole === 'All' || hero.role === selectedRole
-  );
+  const filteredHeroes = heroesData.filter(hero => {
+    const matchesRole = selectedRole === 'All' || hero.role === selectedRole;
+    const matchesSearch = hero.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesRole && matchesSearch;
+  });
 
   const getCounterSuggestions = (enemyPicks: string[]) => {
     const suggestions = new Map<string, number>();
@@ -275,6 +249,16 @@ export default function DraftCalculator() {
                 PICK PHASE
               </Button>
             </div>
+          </div>
+
+          <div className="mb-4">
+            <Input
+              type="text"
+              placeholder="Поиск героя..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="mb-4"
+            />
           </div>
 
           <Tabs value={selectedRole} onValueChange={setSelectedRole} className="w-full">
